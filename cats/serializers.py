@@ -36,6 +36,7 @@ class Base64ImageField(serializers.ImageField):
             ext = format.split('/')[-1]
 
             data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
+
         return super().to_internal_value(data)
 
 
@@ -43,21 +44,15 @@ class CatSerializer(serializers.ModelSerializer):
     achievements = AchievementSerializer(required=False, many=True)
     color = Hex2NameColor()
     age = serializers.SerializerMethodField()
-    image = Base64ImageField(required=False, allow_null=True, use_url=False)
-    image_url = serializers.SerializerMethodField('get_image_url', read_only=True)
-
+    image = Base64ImageField(required=False, allow_null=True)
+    
     class Meta:
         model = Cat
         fields = (
             'id', 'name', 'color', 'birth_year', 'achievements', 'owner', 'age',
-            'image', 'image_url'
+            'image'
             )
         read_only_fields = ('owner',)
-
-    def get_image_url(self, obj):
-        if obj.image:
-            return obj.image.url
-        return None
 
     def get_age(self, obj):
         return dt.datetime.now().year - obj.birth_year
